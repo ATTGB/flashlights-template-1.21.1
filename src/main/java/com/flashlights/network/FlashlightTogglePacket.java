@@ -24,5 +24,6 @@ public class FlashlightTogglePacket {
         PacketByteBuf buf = PacketByteBufs.create();
         buf.writeBoolean(flashlightState);
         Identifier identifier = Identifier.of("flashlights", "flashlight_toggle");
+
     }
 }
