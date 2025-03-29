@@ -4,6 +4,8 @@ import foundry.veil.api.client.render.VeilRenderSystem;
 import foundry.veil.api.client.render.light.AreaLight;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
 import net.minecraft.util.math.Vec3d;
 import org.joml.Quaternionf;
 import org.joml.Vector3d;
@@ -33,7 +35,7 @@ public class LightManager {
                 UUID playerUuid = player.getUuid();
                 Vec3d camPosVec = player.getPos().add(player.getRotationVec(1.0f).multiply(0.3).add(0, 1.75, 0));
 
-                if (debugEnabledMap.getOrDefault(playerUuid, true)) {
+                if (debugEnabledMap.getOrDefault(playerUuid, true) && playerHasRequiredItem(player)) {
                     AreaLight flashLight = flashlights.computeIfAbsent(playerUuid, uuid -> {
                         AreaLight newLight = new AreaLight();
                         newLight.setBrightness(BRIGHTNESS);
@@ -63,6 +65,15 @@ public class LightManager {
                 }
             }
         }
+    }
+
+    private static boolean playerHasRequiredItem(PlayerEntity player) {
+        for (ItemStack itemStack : player.getInventory().main) {
+            if (itemStack.getItem() == Items.TORCH) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public static void removeInactiveFlashlights() {
