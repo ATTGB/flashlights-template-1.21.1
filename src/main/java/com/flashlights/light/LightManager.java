@@ -1,11 +1,13 @@
 package com.flashlights.light;
 
+import com.flashlights.network.LightTogglePacket;
 import foundry.veil.api.client.render.VeilRenderSystem;
 import foundry.veil.api.client.render.light.AreaLight;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
+import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.math.Vec3d;
 import org.joml.Quaternionf;
 import org.joml.Vector3d;
@@ -21,8 +23,15 @@ public class LightManager {
     private static final float ANGLE = 0.6f;
     private static final Map<UUID, Boolean> debugEnabledMap = new HashMap<>();
 
-    public static void toggleDebugEnabled(UUID playerUuid) {
-        debugEnabledMap.put(playerUuid, !debugEnabledMap.getOrDefault(playerUuid, true));
+    public static void toggleDebugEnabled(ServerPlayerEntity player) {
+        UUID playerUuid = player.getUuid();
+        boolean enabled = !debugEnabledMap.getOrDefault(playerUuid, true);
+        debugEnabledMap.put(playerUuid, enabled);
+        LightTogglePacket.send(player, enabled);
+    }
+
+    public static void setDebugEnabled(UUID playerUuid, boolean enabled) {
+        debugEnabledMap.put(playerUuid, enabled);
     }
 
     public static void updateFlashlights() {
