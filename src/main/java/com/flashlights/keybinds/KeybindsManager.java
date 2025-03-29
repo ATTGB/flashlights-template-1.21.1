@@ -12,7 +12,7 @@ public class KeybindsManager {
     public static final KeyBinding toggleFlashlight = new KeyBinding(
             "key.flashlight.toggle_flashlight",
             InputUtil.Type.KEYSYM,
-            GLFW.GLFW_KEY_T,
+            GLFW.GLFW_KEY_G,
             "category.flashlight"
     );
 
