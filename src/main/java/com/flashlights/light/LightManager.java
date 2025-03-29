@@ -4,6 +4,7 @@ import com.flashlights.network.LightTogglePacket;
 import foundry.veil.api.client.render.VeilRenderSystem;
 import foundry.veil.api.client.render.light.AreaLight;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
@@ -30,8 +31,19 @@ public class LightManager {
         LightTogglePacket.send(player, enabled);
     }
 
+    public static void toggleDebugEnabled(ClientPlayerEntity player) {
+        UUID playerUuid = player.getUuid();
+        boolean enabled = !debugEnabledMap.getOrDefault(playerUuid, true);
+        debugEnabledMap.put(playerUuid, enabled);
+        // Here you can add a mechanism to inform the server if needed
+    }
+
     public static void setDebugEnabled(UUID playerUuid, boolean enabled) {
         debugEnabledMap.put(playerUuid, enabled);
+    }
+
+    public static Map<UUID, Boolean> getDebugEnabledMap() {
+        return debugEnabledMap;
     }
 
     public static void updateFlashlights() {

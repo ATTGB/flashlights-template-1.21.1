@@ -22,6 +22,9 @@ public record LightTogglePacket(UUID playerUuid, boolean enable) {
         return new LightTogglePacket(buffer.readUuid(), buffer.readBoolean());
     }
 
+    public static void send() {
+    }
+
     public void encode(PacketByteBuf buffer) {
         buffer.writeUuid(playerUuid);
         buffer.writeBoolean(enable);
