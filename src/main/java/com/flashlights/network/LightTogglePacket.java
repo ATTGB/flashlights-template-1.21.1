@@ -10,7 +10,7 @@ import net.minecraft.util.Identifier;
 import java.util.UUID;
 
 public record LightTogglePacket(UUID playerUuid, boolean enable) {
-    public static final Identifier ID = new Identifier("flashlights", "light_toggle");
+    public static final Identifier ID = Identifier.of("flashlights", "light_toggle");
 
     public static void sendToServer(boolean enable) {
         PacketByteBuf buffer = PacketByteBufs.create();
@@ -25,7 +25,7 @@ public record LightTogglePacket(UUID playerUuid, boolean enable) {
         ServerPlayNetworking.send(player, ID, buffer);
     }
 
-    public static LightTogglePacket decode(PacketByteBuf buffer) {
+    public static LightTogglePacket decode(Object buffer) {
         return new LightTogglePacket(buffer.readUuid(), buffer.readBoolean());
     }
 
