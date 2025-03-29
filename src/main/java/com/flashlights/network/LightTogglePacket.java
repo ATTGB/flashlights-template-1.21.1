@@ -1,5 +1,6 @@
 package com.flashlights.network;
 
+import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.network.PacketByteBuf;
@@ -9,20 +10,23 @@ import net.minecraft.util.Identifier;
 import java.util.UUID;
 
 public record LightTogglePacket(UUID playerUuid, boolean enable) {
-    public static final Identifier ID = Identifier.of("flashlights", "light_toggle");
+    public static final Identifier ID = new Identifier("flashlights", "light_toggle");
 
-    public static void send(ServerPlayerEntity player, boolean enable) {
+    public static void sendToServer(boolean enable) {
         PacketByteBuf buffer = PacketByteBufs.create();
-        buffer.writeUuid(player.getUuid());
         buffer.writeBoolean(enable);
-        ServerPlayNetworking.send(player, ID,);
+        ClientPlayNetworking.send(ID, buffer);
+    }
+
+    public static void sendToClient(ServerPlayerEntity player, UUID playerUuid, boolean enable) {
+        PacketByteBuf buffer = PacketByteBufs.create();
+        buffer.writeUuid(playerUuid);
+        buffer.writeBoolean(enable);
+        ServerPlayNetworking.send(player, ID, buffer);
     }
 
     public static LightTogglePacket decode(PacketByteBuf buffer) {
         return new LightTogglePacket(buffer.readUuid(), buffer.readBoolean());
-    }
-
-    public static void send() {
     }
 
     public void encode(PacketByteBuf buffer) {

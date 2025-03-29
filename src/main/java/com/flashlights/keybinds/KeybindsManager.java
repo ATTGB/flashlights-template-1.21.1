@@ -1,5 +1,6 @@
 package com.flashlights.keybinds;
 
+import com.flashlights.light.LightManager;
 import com.flashlights.network.LightTogglePacket;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.minecraft.client.MinecraftClient;
@@ -28,7 +29,8 @@ public class KeybindsManager {
         if (isFlashlightTogglePressed()) {
             ClientPlayerEntity player = MinecraftClient.getInstance().player;
             if (player != null) {
-                LightTogglePacket.send();
+                boolean enable = !LightManager.isFlashlightEnabled(player.getUuid());
+                LightTogglePacket.sendToServer(enable);
             }
         }
     }
