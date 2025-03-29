@@ -1,11 +1,7 @@
 package com.flashlights;
 
-import com.flashlights.network.FlashlightTogglePacket;
+import com.flashlights.network.FlashlightPacketHandler;
 import net.fabricmc.api.ModInitializer;
-
-import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class Flashlights implements ModInitializer {
 	public static final String MOD_ID = "flashlights";
@@ -16,7 +12,7 @@ public class Flashlights implements ModInitializer {
 
 	@Override
 	public void onInitialize() {
-		FlashlightTogglePacket.register();
+		FlashlightPacketHandler.register();
 
 	}
 }
