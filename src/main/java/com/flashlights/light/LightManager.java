@@ -1,12 +1,10 @@
 package com.flashlights.light;
 
-import com.flashlights.network.FlashlightTogglePacket;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.util.math.Vec3d;
 import foundry.veil.api.client.render.VeilRenderSystem;
 import foundry.veil.api.client.render.light.AreaLight;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.util.math.Vec3d;
 import org.joml.Quaternionf;
 import org.joml.Vector3d;
 
@@ -20,17 +18,6 @@ public class LightManager {
     private static final float DISTANCE = 20.0f;
     private static final float ANGLE = 0.6f;
     private static final Map<UUID, Boolean> debugEnabledMap = new HashMap<>();
-    private static boolean isFlashlightOn = false;
-
-    public static void toggleFlashlight(PlayerEntity player) {
-        isFlashlightOn = !isFlashlightOn;
-        FlashlightTogglePacket.send(isFlashlightOn);
-    }
-
-    public static void handleFlashlightToggle(boolean isFlashlightOn, ServerPlayerEntity player) {
-        LightManager.isFlashlightOn = isFlashlightOn;
-        FlashlightTogglePacket.send(isFlashlightOn);
-    }
 
     public static void toggleDebugEnabled(UUID playerUuid) {
         debugEnabledMap.put(playerUuid, !debugEnabledMap.getOrDefault(playerUuid, true));
