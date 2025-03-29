@@ -15,7 +15,7 @@ public record LightTogglePacket(UUID playerUuid, boolean enable) {
         PacketByteBuf buffer = PacketByteBufs.create();
         buffer.writeUuid(player.getUuid());
         buffer.writeBoolean(enable);
-        ServerPlayNetworking.send(player, ID, buffer);
+        ServerPlayNetworking.send(player, ID,);
     }
 
     public static LightTogglePacket decode(PacketByteBuf buffer) {
