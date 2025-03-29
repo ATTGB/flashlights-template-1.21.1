@@ -1,5 +1,6 @@
 package com.flashlights.network;
 
+import com.flashlights.light.LightManager;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.network.PacketByteBuf;
@@ -8,9 +9,10 @@ import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.registry.Registry;
+import com.flashlights.LightManager;
 
 public class FlashlightPacketHandler {
-    public static final Identifier FLASHLIGHT_TOGGLE_PACKET_ID = Identifier.of("flashlights", "flashlight_toggle");
+    public static final Identifier FLASHLIGHT_TOGGLE_PACKET_ID = new Identifier("flashlights", "flashlight_toggle");
 
     public static void register() {
         ServerPlayNetworking.registerGlobalReceiver(FLASHLIGHT_TOGGLE_PACKET_ID, (server, player, handler, buf, responseSender) -> {
@@ -25,7 +27,7 @@ public class FlashlightPacketHandler {
     }
 
     private static void updateFlashlightState(PlayerEntity player, boolean flashlightState) {
-        LightManager.setFlashlightState(player, flashlightState);
+        LightManager.handleFlashlightToggle(player, flashlightState);
     }
 
     private static void notifyPlayers(PlayerEntity player, boolean flashlightState) {
