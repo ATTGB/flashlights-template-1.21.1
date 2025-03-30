@@ -13,27 +13,27 @@ import java.util.UUID;
 
 public class FlashlightsClient implements ClientModInitializer {
 
+
     @Override
     public void onInitializeClient() {
         KeybindsManager.register();
-        LightManager.initialize();
 
         ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> {
             UUID playerUuid = MinecraftClient.getInstance().getSession().getUuidOrNull();
             if (playerUuid == null) return;
-            LightManager.handleToggleFlashlight(playerUuid, false);
+            LightManager.onPlayerDisconnected(playerUuid);
         });
 
         ClientPlayConnectionEvents.JOIN.register((handler, client, isFirstJoin) -> {
             UUID playerUuid = MinecraftClient.getInstance().getSession().getUuidOrNull();
             if (playerUuid != null) {
-                LightManager.handleToggleFlashlight(playerUuid, LightManager.isFlashlightEnabled(playerUuid));
+                LightManager.onPlayerRejoined(playerUuid);
             }
         });
 
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
             KeybindsManager.handleFlashlightToggle();
-            LightManager.updateFlashlights();
+            LightManager.removeInactiveFlashlights();
         });
 
         FabricVeilRenderLevelStageEvent.EVENT.register((stage, levelRenderer, bufferSource, matrixStack, frustumMatrix, projectionMatrix, renderTick, deltaTracker, camera, frustum) -> {
@@ -43,3 +43,5 @@ public class FlashlightsClient implements ClientModInitializer {
         });
     }
 }
+
+

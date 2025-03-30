@@ -1,15 +1,11 @@
 package com.flashlights.light;
 
-import com.flashlights.network.LightTogglePacket;
 import foundry.veil.api.client.render.VeilRenderSystem;
 import foundry.veil.api.client.render.light.AreaLight;
-import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
-import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.math.Vec3d;
 import org.joml.Quaternionf;
 import org.joml.Vector3d;
@@ -23,31 +19,10 @@ public class LightManager {
     private static final float BRIGHTNESS = 2.0f;
     private static final float DISTANCE = 20.0f;
     private static final float ANGLE = 0.6f;
-    private static final Map<UUID, Boolean> flashlightEnabledMap = new HashMap<>();
+    private static final Map<UUID, Boolean> debugEnabledMap = new HashMap<>();
 
-    public static void initialize() {
-        ServerPlayNetworking.registerGlobalReceiver(LightTogglePacket.ID, (server, player, handler, buffer, responseSender) -> {
-            LightTogglePacket packet = LightTogglePacket.decode(buffer);
-            server.execute(() -> {
-                flashlightEnabledMap.put(packet.playerUuid(), packet.enable());
-                for (ServerPlayerEntity serverPlayer : server.getPlayerManager().getPlayerList()) {
-                    LightTogglePacket.sendToClient(serverPlayer, packet.playerUuid(), packet.enable());
-                }
-            });
-        });
-    }
-
-    public static void handleToggleFlashlight(UUID playerUuid, boolean enable) {
-        flashlightEnabledMap.put(playerUuid, enable);
-        if (enable) {
-            // Enable flashlight logic
-        } else {
-            // Disable flashlight logic
-        }
-    }
-
-    public static boolean isFlashlightEnabled(UUID playerUuid) {
-        return flashlightEnabledMap.getOrDefault(playerUuid, false);
+    public static void toggleDebugEnabled(UUID playerUuid) {
+        debugEnabledMap.put(playerUuid, !debugEnabledMap.getOrDefault(playerUuid, true));
     }
 
     public static void updateFlashlights() {
@@ -60,7 +35,7 @@ public class LightManager {
                 UUID playerUuid = player.getUuid();
                 Vec3d camPosVec = player.getPos().add(player.getRotationVec(1.0f).multiply(0.3).add(0, 1.75, 0));
 
-                if (flashlightEnabledMap.getOrDefault(playerUuid, true) && playerHasRequiredItem(player)) {
+                if (debugEnabledMap.getOrDefault(playerUuid, true) && playerHasRequiredItem(player)) {
                     AreaLight flashLight = flashlights.computeIfAbsent(playerUuid, uuid -> {
                         AreaLight newLight = new AreaLight();
                         newLight.setBrightness(BRIGHTNESS);
@@ -83,6 +58,10 @@ public class LightManager {
                     );
                     Quaternionf currentOrientation = new Quaternionf(flashLight.getOrientation());
                     currentOrientation.slerp(goal, 0.15f);
+                    flashLight.setOrientation(currentOrientation);
+                } else {
+                    cleanUpFlashlight(playerUuid);
+                    flashlights.remove(playerUuid);
                 }
             }
         }
@@ -95,5 +74,43 @@ public class LightManager {
             }
         }
         return false;
+    }
+
+    public static void removeInactiveFlashlights() {
+        MinecraftClient client = MinecraftClient.getInstance();
+
+        if (client.world != null) {
+            flashlights.entrySet().removeIf(entry -> {
+                UUID uuid = entry.getKey();
+                PlayerEntity player = client.world.getPlayerByUuid(uuid);
+
+                if (player == null) {
+                    VeilRenderSystem.renderer().getLightRenderer().removeLight(entry.getValue());
+                    return true;
+                }
+
+                return false;
+            });
+        }
+    }
+
+    private static void cleanUpFlashlight(UUID playerUuid) {
+        AreaLight light = flashlights.get(playerUuid);
+        if (light != null) {
+            VeilRenderSystem.renderer().getLightRenderer().removeLight(light);
+        }
+    }
+
+    public static void onPlayerDisconnected(UUID playerUuid) {
+        cleanUpFlashlight(playerUuid);
+    }
+
+    public static void onPlayerRejoined(UUID playerUuid) {
+        cleanUpFlashlight(playerUuid);
+
+        MinecraftClient client = MinecraftClient.getInstance();
+        if (client.world == null) return;
+
+        updateFlashlights();
     }
 }
