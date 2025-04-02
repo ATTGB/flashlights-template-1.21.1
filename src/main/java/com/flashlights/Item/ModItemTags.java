@@ -1,6 +1,6 @@
 package com.flashlights.Item;
 
-import natdertale.flashlights.FlashLights;
+import com.flashlights.Flashlights;
 import net.minecraft.item.Item;
 import net.minecraft.registry.RegistryKeys;
 import net.minecraft.registry.tag.TagKey;
@@ -14,6 +14,6 @@ public class ModItemTags {
     }
 
     private static TagKey<Item> of(String id) {
-        return TagKey.of(RegistryKeys.ITEM, Identifier.of(flashlights.MOD_ID,id));
+        return TagKey.of(RegistryKeys.ITEM, Identifier.of(Flashlights.MOD_ID,id));
     }
 }

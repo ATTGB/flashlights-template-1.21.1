@@ -1,5 +1,6 @@
 package com.flashlights.Item;
 
+import com.flashlights.Flashlights;
 import com.flashlights.Item.items.FlashLightItem;
 import net.fabricmc.fabric.api.itemgroup.v1.FabricItemGroupEntries;
 import net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents;
@@ -15,7 +16,7 @@ public class ModItems {
     public static FlashLightItem FLASH_LIGHT = registerItem("flashlight", new FlashLightItem(new Item.Settings().maxCount(1)));
 
     private static <T extends Item> T registerItem(String name, T item) {
-        return Registry.register(Registries.ITEM, Identifier.of(flashlights.MOD_ID, name), item);
+        return Registry.register(Registries.ITEM, Identifier.of(Flashlights.MOD_ID), item);
     }
 
     private static void addItemsToToolsItemGroup(FabricItemGroupEntries entries) {

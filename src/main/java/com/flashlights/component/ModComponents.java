@@ -1,7 +1,7 @@
 package com.flashlights.component;
 
+import com.flashlights.Flashlights;
 import com.mojang.serialization.Codec;
-import natdertale.flashlights.FlashLights;
 import net.minecraft.component.ComponentType;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
@@ -16,12 +16,12 @@ public class ModComponents {
     private static <T> ComponentType<T> register(
             String name, UnaryOperator<ComponentType.Builder<T>>
             builderOperator ) {
-        return Registry.register(Registries.DATA_COMPONENT_TYPE, Identifier.of(FlashLights.MOD_ID, name),
+        return Registry.register(Registries.DATA_COMPONENT_TYPE, Identifier.of(Flashlights.MOD_ID, name),
                 builderOperator.apply(ComponentType.builder()).build());
     }
 
     public static void registerDataComponentsTypes() {
-        FlashLights.LOGGER.info("Registering Components Types for " + FlashLights.MOD_ID);
+        Flashlights.LOGGER.info("Registering Components Types for " + Flashlights.MOD_ID);
     }
 
 }
