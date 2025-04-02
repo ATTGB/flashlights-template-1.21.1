@@ -1,4 +1,5 @@
 
+
 package com.flashlights.light;
 
 import com.flashlights.Item.items.FlashLightItem;
@@ -9,6 +10,7 @@ import foundry.veil.api.client.render.VeilRenderSystem;
 import foundry.veil.api.client.render.light.AreaLight;
 import foundry.veil.platform.VeilEventPlatform;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.render.Camera;
 import net.minecraft.client.render.RenderTickCounter;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
@@ -55,17 +57,19 @@ public class LightManager {
             if (ITEM_LIGHT.containsKey(player.getId())) {
                 light = ITEM_LIGHT.get(player.getId());
             } else {
-                light.setBrightness(1.0f);
+                light.setBrightness(2.0f);
 
                 int color = DEFAULT_LIGHT_COLOR;
                 if (stack.get(ModComponents.COLOR)!=null) {
                     color = ColorUtils.blendColors(DEFAULT_LIGHT_COLOR, stack.get(ModComponents.COLOR));
                 }
 
-
                 light.setColor(color);
-                light.setDistance(30.0f);
-                light.setAngle(1f);
+                light.setBrightness(0.0f);
+                light.setSize(0.0f, 0.0f);
+                light.setDistance(20.0f);
+                light.setAngle(0.6f);
+
 
                 ITEM_LIGHT.put(player.getId(), light);
                 VeilRenderSystem.renderer().getLightRenderer().addLight(light);
@@ -84,7 +88,9 @@ public class LightManager {
             // compoent on/off
             if (stack.get(ModComponents.IS_ON)!=null) {
                 if (!stack.get(ModComponents.IS_ON)) {
-                    light.setBrightness(1.0f);
+                    light.setBrightness(2.0f);
+                    light.setPosition(player.getX(), player.getY() + 1.6f, player.getZ());
+
                 } else {
                     light.setBrightness(0.0f);
                 }
