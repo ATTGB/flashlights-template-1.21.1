@@ -17,30 +17,9 @@ public class FlashlightsClient implements ClientModInitializer {
     @Override
     public void onInitializeClient() {
         KeybindsManager.register();
+        LightManager.init();
 
-        ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> {
-            UUID playerUuid = MinecraftClient.getInstance().getSession().getUuidOrNull();
-            if (playerUuid == null) return;
-            LightManager.onPlayerDisconnected(playerUuid);
-        });
 
-        ClientPlayConnectionEvents.JOIN.register((handler, client, isFirstJoin) -> {
-            UUID playerUuid = MinecraftClient.getInstance().getSession().getUuidOrNull();
-            if (playerUuid != null) {
-                LightManager.onPlayerRejoined(playerUuid);
-            }
-        });
-
-        ClientTickEvents.END_CLIENT_TICK.register(client -> {
-            KeybindsManager.handleFlashlightToggle();
-            LightManager.removeInactiveFlashlights();
-        });
-
-        FabricVeilRenderLevelStageEvent.EVENT.register((stage, levelRenderer, bufferSource, matrixStack, frustumMatrix, projectionMatrix, renderTick, deltaTracker, camera, frustum) -> {
-            if (stage == VeilRenderLevelStageEvent.Stage.AFTER_LEVEL) {
-                LightManager.updateFlashlights();
-            }
-        });
     }
 }
 

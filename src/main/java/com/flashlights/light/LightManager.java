@@ -1,11 +1,20 @@
+
 package com.flashlights.light;
 
+import com.flashlights.Item.items.FlashLightItem;
+import com.flashlights.component.ModComponents;
+import com.flashlights.utils.ColorUtils;
+import com.flashlights.utils.OrientationUtils;
 import foundry.veil.api.client.render.VeilRenderSystem;
 import foundry.veil.api.client.render.light.AreaLight;
+import foundry.veil.platform.VeilEventPlatform;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.render.RenderTickCounter;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
+import net.minecraft.util.Hand;
 import net.minecraft.util.math.Vec3d;
 import org.joml.Quaternionf;
 import org.joml.Vector3d;
@@ -15,102 +24,81 @@ import java.util.Map;
 import java.util.UUID;
 
 public class LightManager {
-    private static final Map<UUID, AreaLight> flashlights = new HashMap<>();
-    private static final float BRIGHTNESS = 2.0f;
-    private static final float DISTANCE = 20.0f;
-    private static final float ANGLE = 0.6f;
-    private static final Map<UUID, Boolean> debugEnabledMap = new HashMap<>();
+    public static final HashMap<Integer, AreaLight> ITEM_LIGHT = new HashMap<>();
+    public static final int DEFAULT_LIGHT_COLOR = 0xFFf0d3d3;
+    public static final int WHITE_LIGHT_COLOR = 0xFFf0f0f0;
 
-    public static void toggleDebugEnabled(UUID playerUuid) {
-        debugEnabledMap.put(playerUuid, !debugEnabledMap.getOrDefault(playerUuid, true));
+    public static void init() {
+        VeilEventPlatform.INSTANCE.onVeilRenderLevelStage((stage, levelRenderer, bufferSource, matrixStack, frustumMatrix, projectionMatrix, renderTick, deltaTracker, camera, frustum) -> {
+            for (Entity entity : MinecraftClient.getInstance().world.getEntities()) {
+                if (entity instanceof PlayerEntity player) {
+                    tickPlayerFlashlight(player, deltaTracker);
+                }
+            }
+
+        });
     }
 
-    public static void updateFlashlights() {
-        MinecraftClient client = MinecraftClient.getInstance();
+    private static void tickPlayerFlashlight(PlayerEntity player, RenderTickCounter deltaTracker) {
 
-        if (client.world != null) {
-            for (PlayerEntity player : client.world.getPlayers()) {
-                if (player == null) continue;
+        // TODO if player has a flashlight in hand else set delete his light
+        if (player.getMainHandStack().getItem() instanceof FlashLightItem || player.getOffHandStack().getItem() instanceof FlashLightItem) {
 
-                UUID playerUuid = player.getUuid();
-                Vec3d camPosVec = player.getPos().add(player.getRotationVec(1.0f).multiply(0.3).add(0, 1.75, 0));
+            Hand hand = (player.getOffHandStack().getItem() instanceof FlashLightItem) ? Hand.OFF_HAND : Hand.MAIN_HAND;
 
-                if (debugEnabledMap.getOrDefault(playerUuid, true) && playerHasRequiredItem(player)) {
-                    AreaLight flashLight = flashlights.computeIfAbsent(playerUuid, uuid -> {
-                        AreaLight newLight = new AreaLight();
-                        newLight.setBrightness(BRIGHTNESS);
-                        newLight.setColor(1.0f, 0.95f, 0.85f);
-                        newLight.setDistance(DISTANCE);
-                        newLight.setAngle(ANGLE);
-                        newLight.setSize(0.0F, 0.0F);
-                        newLight.setPosition(camPosVec.x, camPosVec.y, camPosVec.z);
-                        VeilRenderSystem.renderer().getLightRenderer().addLight(newLight);
-                        return newLight;
-                    });
+            ItemStack stack = player.getStackInHand(hand);
 
-                    flashLight.setPosition(flashLight.getPosition().lerp(
-                            new Vector3d(camPosVec.x, camPosVec.y, camPosVec.z), 0.5F, new Vector3d()));
+            AreaLight light = new AreaLight();
+            Vec3d renderPosition = player.getLerpedPos(deltaTracker.getTickDelta(false));
+            Vec3d eyepos = player.getEyePos();
 
-                    Quaternionf goal = new Quaternionf().rotateXYZ(
-                            (float) -Math.toRadians(player.getPitch()),
-                            (float) Math.toRadians(player.getYaw()),
-                            0.0f
-                    );
-                    Quaternionf currentOrientation = new Quaternionf(flashLight.getOrientation());
-                    currentOrientation.slerp(goal, 0.15f);
-                    flashLight.setOrientation(currentOrientation);
+            if (ITEM_LIGHT.containsKey(player.getId())) {
+                light = ITEM_LIGHT.get(player.getId());
+            } else {
+                light.setBrightness(1.0f);
+
+                int color = DEFAULT_LIGHT_COLOR;
+                if (stack.get(ModComponents.COLOR)!=null) {
+                    color = ColorUtils.blendColors(DEFAULT_LIGHT_COLOR, stack.get(ModComponents.COLOR));
+                }
+
+
+                light.setColor(color);
+                light.setDistance(30.0f);
+                light.setAngle(1f);
+
+                ITEM_LIGHT.put(player.getId(), light);
+                VeilRenderSystem.renderer().getLightRenderer().addLight(light);
+            }
+            light.setPosition(renderPosition.x, renderPosition.y+1.5, renderPosition.z);
+            light.setOrientation(OrientationUtils.getOrientation(player.getRotationVector()));
+
+            int color = DEFAULT_LIGHT_COLOR;
+            if (stack.get(ModComponents.COLOR)!=null) {
+                color = ColorUtils.blendColors(DEFAULT_LIGHT_COLOR, stack.get(ModComponents.COLOR));
+            }
+
+
+            light.setColor(color);
+
+            // compoent on/off
+            if (stack.get(ModComponents.IS_ON)!=null) {
+                if (!stack.get(ModComponents.IS_ON)) {
+                    light.setBrightness(1.0f);
                 } else {
-                    cleanUpFlashlight(playerUuid);
-                    flashlights.remove(playerUuid);
+                    light.setBrightness(0.0f);
                 }
+            } else {
+                light.setBrightness(0.0f);
             }
-        }
-    }
 
-    private static boolean playerHasRequiredItem(PlayerEntity player) {
-        for (ItemStack itemStack : player.getInventory().main) {
-            if (itemStack.getItem() == Items.TORCH) {
-                return true;
-            }
-        }
-        return false;
-    }
 
-    public static void removeInactiveFlashlights() {
-        MinecraftClient client = MinecraftClient.getInstance();
 
-        if (client.world != null) {
-            flashlights.entrySet().removeIf(entry -> {
-                UUID uuid = entry.getKey();
-                PlayerEntity player = client.world.getPlayerByUuid(uuid);
-
-                if (player == null) {
-                    VeilRenderSystem.renderer().getLightRenderer().removeLight(entry.getValue());
-                    return true;
-                }
-
-                return false;
-            });
-        }
-    }
-
-    private static void cleanUpFlashlight(UUID playerUuid) {
-        AreaLight light = flashlights.get(playerUuid);
-        if (light != null) {
+        } else if (ITEM_LIGHT.containsKey(player.getId())){
+            AreaLight light = ITEM_LIGHT.get(player.getId());
             VeilRenderSystem.renderer().getLightRenderer().removeLight(light);
+            ITEM_LIGHT.remove(player.getId());
         }
-    }
 
-    public static void onPlayerDisconnected(UUID playerUuid) {
-        cleanUpFlashlight(playerUuid);
-    }
-
-    public static void onPlayerRejoined(UUID playerUuid) {
-        cleanUpFlashlight(playerUuid);
-
-        MinecraftClient client = MinecraftClient.getInstance();
-        if (client.world == null) return;
-
-        updateFlashlights();
     }
 }

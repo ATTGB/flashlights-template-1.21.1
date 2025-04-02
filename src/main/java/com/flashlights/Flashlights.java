@@ -1,5 +1,7 @@
 package com.flashlights;
 
+import com.flashlights.Item.ModItems;
+import com.flashlights.component.ModComponents;
 import net.fabricmc.api.ModInitializer;
 
 import org.slf4j.Logger;
@@ -18,7 +20,8 @@ public class Flashlights implements ModInitializer {
 		// This code runs as soon as Minecraft is in a mod-load-ready state.
 		// However, some things (like resources) may still be uninitialized.
 		// Proceed with mild caution.
-
+		ModItems.RegisterModItems();
+		ModComponents.registerDataComponentsTypes();
 		LOGGER.info("Hello Fabric world!");
 	}
 }

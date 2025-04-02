@@ -21,17 +21,6 @@ public class KeybindsManager {
         KeyBindingHelper.registerKeyBinding(toggleFlashlight);
     }
 
-    public static boolean isFlashlightTogglePressed() {
-        return toggleFlashlight.wasPressed();
-    }
 
-    public static void handleFlashlightToggle() {
-        if (isFlashlightTogglePressed()) {
-            ClientPlayerEntity player = MinecraftClient.getInstance().player;
-            if (player != null) {
-                LightManager.toggleDebugEnabled(player.getUuid());
-                LightManager.updateFlashlights();
-            }
-        }
-    }}
+    }
 
