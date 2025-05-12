@@ -3,7 +3,8 @@
 	"package": "com.flashlights.mixin",
 	"compatibilityLevel": "JAVA_21",
 	"mixins": [
-		"ExampleMixin"
+		"ExampleMixin",
+		"ExplosionMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1
