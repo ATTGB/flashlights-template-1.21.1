@@ -1,13 +1,14 @@
 package com.flashlights;
 
 import net.fabricmc.api.ModInitializer;
+import net.minecraft.util.Identifier;
 
 public class Flashlights implements ModInitializer {
+    public static final String MOD_ID = "flashlights";
+
     @Override
     public void onInitialize() {
-        VeilRenderSystem.registerRenderTask(RenderPhase.LAST, (context, buffer) -> {
-        // Draw a red rectangle at (50, 50) with size (100, 100)
-        context.fill(buffer, 50, 50, 150, 150, 0xFFFF0000);
-    });
-}
-}
+
+        }
+    }
+
