@@ -1,5 +1,5 @@
 plugins {
-	id 'fabric-loom' version '1.10-SNAPSHOT'
+	id 'fabric-loom' version "${loom_version}"
 	id 'maven-publish'
 }
 
@@ -11,21 +11,9 @@ base {
 }
 
 repositories {
-	mavenLocal()
 	maven {
 		name = 'BlameJared Maven (CrT / Bookshelf)'
 		url = 'https://maven.blamejared.com'
-	}
-	exclusiveContent {
-		forRepository {
-			maven {
-				name = "Modrinth"
-				url = "https://api.modrinth.com/maven"
-			}
-		}
-		filter {
-			includeGroup "maven.modrinth"
-		}
 	}
 }
 
@@ -40,7 +28,11 @@ dependencies {
 	mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
 	modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
 	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
-	modImplementation("foundry.veil:veil-fabric-${project.minecraft_version}:${project.veil_version}")
+
+	modImplementation("foundry.veil:veil-fabric-${project.minecraft_version}:${project.veil_version}") {
+		exclude group: "maven.modrinth"
+		exclude group: "me.fallenbreath"
+	}
 }
 
 processResources {
